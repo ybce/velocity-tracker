@@ -1,0 +1,31 @@
+{
+  "name": "github-issue-printer",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jamiemjennings/github-issue-printer"
+  },
+  "version": "0.0.5-0",
+  "description": "A utility to generate PDF files from GitHub issues",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha tests/unit_tests/**/*.test.js --reporter spec"
+  },
+  "author": "Jamie Jennings <jamiemjennings@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "async": "^2.6.1",
+    "commander": "^2.19.0",
+    "emoji-strip": "^1.0.1",
+    "lodash": "^4.17.11",
+    "pdfkit": "^0.9.0",
+    "remove-markdown": "^0.3.0",
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.5",
+    "standard": "^14.0.0"
+  },
+  "devDependencies": {
+    "chai": "4.2.0",
+    "mocha": "5.2.0",
+    "sinon": "7.5.0"
+  }
+}
