@@ -1,4 +1,5 @@
 const args = require('commander')
+const inquirer = require('inquirer')
 
 const packageInfo = require('./package.json')
 const HttpUtil = require('./http')
@@ -10,6 +11,23 @@ const httpUtil = new HttpUtil()
 
 const POINTS_LABELS = [
   'Point: 0.5', 'Point: 1', 'Point: 2', 'Point: 3', 'Point: 5', 'Point: 8', 'Point: 13', 'Point: 21'
+]
+
+var questions = [{
+  type: 'input',
+  name: 'devs',
+  message: 'How many devs did you have for this beat?'
+},
+{
+  type: 'input',
+  name: 'points',
+  message: 'How many points did you commit to for this beat?'
+},
+{
+  type: 'input',
+  name: 'days',
+  message: 'How many days did you have this beat?'
+}
 ]
 
 const POINTS_MAP = new Map([['Point: 0.5', 0.5], ['Point: 1', 1], ['Point: 2', 2], ['Point: 3', 3], ['Point: 5', 5], ['Point: 8', 8], ['Point: 13', 13], ['Point: 21', 21]])
@@ -43,17 +61,30 @@ if (!args.token) {
 // call async function from main without promise warnings
 // https://stackoverflow.com/questions/46515764/how-can-i-use-async-await-at-the-top-level
 
+async function getAnswers () {
+  const answers = await inquirer.prompt(questions)
+  return answers
+}
+
 (async () => {
-  const velocity = await processVelocity(args.token, projectColumn, args.beat)
-  console.log(velocity)
+  const answers = await getAnswers()
+  const totalPoints = await processVelocity(args.token, projectColumn, args.beat)
+  const results = processStats(totalPoints, answers)
+  console.table(results)
 })().catch(e => {
   console.log('ERROR:')
   console.log(e)
   process.exit(1)
 })
 
+function processStats (totalPoints, answers) {
+  const pointsPerDev = totalPoints / answers.devs
+  const pointsPerDays = pointsPerDev / answers.days
+  const missedPoints = answers.points - totalPoints
+  return { pointsCommited: Number(answers.points), beatLength: Number(answers.days), numberOfDevs: Number(answers.devs), pointsClosed: totalPoints, pointsPerDev, pointsPerDays, missedPoints }
+}
+
 async function processVelocity (bearerToken, url = projectColumn, beat) {
-  console.log(typeof (beat))
   const columnId = url.split('#column-')[1]
   const cardsUrl = `https://api.github.com/projects/columns/${columnId}/cards`
   const cardsBody = await httpUtil.httpGet(bearerToken, cardsUrl, { accept: 'application/vnd.github.inertia-preview+json' }
